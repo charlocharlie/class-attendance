@@ -1,0 +1,5 @@
+{
+  "description": "Easily collect attendance numbers and lunch count via touch input.",
+  "start_url": "/",
+  "display": "standalone"
+}

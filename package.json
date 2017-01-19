@@ -1,0 +1,22 @@
+{
+  "name": "class-attendance",
+  "version": "1.0.0",
+  "description": "Easily collect attendance numbers and lunch count via touch input.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "",
+  "keywords": [
+    "Electron",
+    "attendance",
+    "lunch",
+    "school",
+    "class"
+  ],
+  "author": "Charlie Laabs",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^1.4.1"
+  }
+}

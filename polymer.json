@@ -1,0 +1,19 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/class-attendance-app.html",
+  "fragments": [
+    "src/class-list-view.html",
+    "src/class-list-view.js",
+    "src/la-resistance.css",
+    "src/la-resistance.html",
+    "class.json"
+  ],
+  "sources": [
+   "src/**/*",
+   "bower.json"
+  ],
+  "includeDependencies": [
+    "manifest.json",
+    "bower_components/webcomponentsjs/webcomponents-lite.min.js"
+  ]
+}

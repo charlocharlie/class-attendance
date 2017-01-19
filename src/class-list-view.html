@@ -1,0 +1,67 @@
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+
+<dom-module id="student-module" attributes="name index">
+    <template>
+        <style is="custom-style" include="iron-flex iron-flex-alignment">
+            :host {
+                display: flex;
+                padding: 2px;
+            }
+
+            h3 {
+                margin: 0;
+            }
+
+            paper-radio-button {
+                --paper-radio-button-size: 32px;
+                --paper-radio-button-label-spacing: -50%;
+                font-size: 20px;
+                padding: 0;
+            }
+        </style>
+        <paper-card style="width:100%">
+            <div class="card-content horizontal layout center">
+                <h3 class="name flex">{{name}}</h3>
+                <paper-radio-group id="radio-group-[[index]]" class="radio-group" selected="{{selected}}">
+                    <paper-radio-button name="hot">H</paper-radio-button>
+                    <paper-radio-button name="cold">C</paper-radio-button>
+                    <paper-radio-button name="bag">B</paper-radio-button>
+                    <paper-radio-button name="absent">A</paper-radio-button>
+                </paper-radio-group>
+            </div>
+        </paper-card>
+    </template>
+    <script>
+        Polymer({
+            is: 'student-module',
+            properties: {
+                selected: {
+                    type: String,
+                    observer: "selectionChanged",
+                    value: "absent"
+                }
+            },
+            selectionChanged: function (newVal, oldVal) {
+                if (oldVal != undefined) {
+                    this.fire("radioChange", {
+                        index: this.index,
+                        radio: this.selected,
+                        name: this.name
+                    });
+                }
+            }
+        });
+    </script>
+</dom-module>
+
+<dom-module id="class-list-view">
+    <script src="class-list-view.js">
+        Polymer({
+            is: 'class-list-view'
+        });
+    </script>
+</dom-module>
