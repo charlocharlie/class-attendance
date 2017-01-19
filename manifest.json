@@ -1,4 +1,6 @@
 {
+  "name": "class-attendance",
+  "short_name": "class-attendance",
   "description": "Easily collect attendance numbers and lunch count via touch input.",
   "start_url": "/",
   "display": "standalone"
