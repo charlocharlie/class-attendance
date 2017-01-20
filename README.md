@@ -5,6 +5,10 @@
 Each student in a list is able to select hot, cold, or bag lunch. 
 Each student defaults to absent, so if they enter nothing, they are considered absent.
 
+**Download**
+
+Download the most recent release [here](https://github.com/charlocharlie/class-attendance/releases).
+
 **How to edit student list**
 
 Find the `class.json` file located in the same directory as the `class-attendance.exe` application. 

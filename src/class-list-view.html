@@ -38,6 +38,12 @@
     <script>
         Polymer({
             is: 'student-module',
+            attached: function () {
+                if ( this.index % 2 == 1 ){
+                    this.customStyle['--paper-card-background-color'] = '#D7CCC8';
+                    this.updateStyles();
+                }
+            },
             properties: {
                 selected: {
                     type: String,

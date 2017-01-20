@@ -7,8 +7,8 @@
         let classData = [];
         for (let index = 0; index < classArray.length; index++) {
             let dynamicEl = document.createElement("student-module");
-            dynamicEl.setAttribute("name", classArray[index]);
             dynamicEl.setAttribute("index", index);
+            dynamicEl.setAttribute("name", classArray[index]);
             dynamicEl.setAttribute("id", "student-module-" + index);
             document.getElementById("class-list-view").appendChild(dynamicEl);
             document.getElementById("student-module-" + index).addEventListener("radioChange", radioChanged);
