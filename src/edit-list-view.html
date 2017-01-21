@@ -1,0 +1,144 @@
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+
+<dom-module id="edit-module" attributes="name">
+    <template>
+        <style is="custom-style" include="iron-flex iron-flex-alignment">
+            :host {
+                display: flex;
+                padding: 2px;
+                width: 100%;
+            }
+
+            h3 {
+                margin: 0;
+            }
+
+            paper-input {
+                --paper-input-container-label: {
+                    color: #9E9E9E;
+                };
+            }
+            paper-icon-button {
+                height: 30px;
+                width: 30px;
+                padding: 2px;
+                color: #9E9E9E;
+            }
+            paper-icon-button:hover {
+                color: #932313;
+            }
+            paper-input {
+                margin-left: 8px;
+            }
+        </style>
+        <paper-card style="width: 100%">
+            <div class="card-content horizontal layout center">
+                <div class="vertical layout">
+                    <paper-icon-button id="upArrow" on-tap="swapUp" icon="arrow-upward"></paper-icon-button>
+                    <paper-tooltip for="upArrow" position="right">Swap with above</paper-tooltip>
+                    <paper-icon-button id="downArrow" on-tap="swapDown" icon="arrow-downward"></paper-icon-button>
+                    <paper-tooltip for="downArrow" position="right">Swap with below</paper-tooltip>
+                </div>
+                <paper-icon-button id="removeButton" on-tap="removeModule" icon="cancel"></paper-icon-button>
+                <paper-tooltip for="removeButton" position="right">Remove entry</paper-tooltip>
+                <paper-input style="" no-label-float value="{{name}}" label="Student name" class="flex name"></paper-input>
+            </div>
+        </paper-card>
+    </template>
+    <script>
+        Polymer({
+            is: 'edit-module',
+            removeModule: function() {
+                this.remove();
+            },
+            getIndex: function () {
+                let parent = this.parentNode;
+                return Array.prototype.indexOf.call(parent.children, this);
+            },
+            swapUp: function() {
+                this.fire("swapNodes", {
+                    child1: this,
+                    child2: this.previousSibling
+                });
+            },
+            swapDown: function() {
+                this.fire("swapNodes", {
+                    child1: this,
+                    child2: this.nextSibling
+                });
+            }
+        });
+    </script>
+</dom-module>
+
+<dom-module id="edit-list-view">
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+        paper-icon-button:hover {
+            color: #932313;
+        }
+    </style>
+    <template>
+        <div class="layout vertical">
+            <div id="sortable-list"></div>
+            <div class="layout horizontal">
+                <paper-icon-button id="addButton" icon="add-circle-outline" on-tap="addModule"></paper-icon-button>
+                <paper-tooltip for="addButton" position="right">Add new entry</paper-tooltip>
+                <paper-icon-button id="saveButton" icon="save" on-tap="saveList"></paper-icon-button>
+                <paper-tooltip for="saveButton" position="right">Save list permanently</paper-tooltip>
+            </div>
+        </div>
+
+    </template>
+    <script>
+        Polymer({
+            is: 'edit-list-view',
+            ready: function() {
+                this.addEventListener("removeChild", function(e) {
+                    document.getElementById("sortable-list").removeChild( e.detail.childEl );
+                });
+                this.addEventListener("swapNodes", function(e) {
+                    if ( e.detail.child1 != null && e.detail.child2 != null ) {
+                        let temp = e.detail.child1.name;
+                        e.detail.child1.name = e.detail.child2.name;
+                        e.detail.child2.name = temp;
+                    }
+                });
+
+
+            },
+            attached: function() {
+                const fs = require('fs');
+                let classArray = [];
+                try {
+                    classArray = JSON.parse(fs.readFileSync('class.json', 'utf8'));
+                    let sortableList = document.getElementById("sortable-list")
+                    for ( let i = 0; i < classArray.length; i++) {
+                        let dynamicEl = document.createElement("edit-module");
+                        dynamicEl.setAttribute("name", classArray[i]);
+                        sortableList.appendChild(dynamicEl);
+                    }
+                }
+                catch (err){}
+            },
+            addModule: function() {
+                let dynamicEl = document.createElement("edit-module");
+                dynamicEl.setAttribute("name", "");
+                document.getElementById("sortable-list").appendChild(dynamicEl);
+            },
+            saveList: function() {
+                let classList = [];
+                let listChildren = document.getElementById("sortable-list").children;
+                for ( let i = 0; i < listChildren.length; i++ ) {
+                    classList.push(listChildren[i].name);
+                }
+                const fs = require('fs');
+                fs.writeFileSync('class.json', JSON.stringify(classList),'utf8');
+            }
+        });
+    </script>
+</dom-module>

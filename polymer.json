@@ -6,6 +6,7 @@
     "src/class-list-view.js",
     "src/la-resistance.css",
     "src/la-resistance.html",
+    "src/edit-list-view.html",
     "class.json"
   ],
   "sources": [
