@@ -8,7 +8,7 @@
 <dom-module id="edit-module" attributes="name">
     <template>
         <style is="custom-style" include="iron-flex iron-flex-alignment">
-            :host {
+             :host {
                 display: flex;
                 padding: 2px;
                 width: 100%;
@@ -21,17 +21,21 @@
             paper-input {
                 --paper-input-container-label: {
                     color: #9E9E9E;
-                };
+                }
+                ;
             }
+
             paper-icon-button {
                 height: 30px;
                 width: 30px;
                 padding: 2px;
                 color: #9E9E9E;
             }
+
             paper-icon-button:hover {
                 color: #932313;
             }
+
             paper-input {
                 margin-left: 8px;
             }
@@ -46,27 +50,30 @@
                 </div>
                 <paper-icon-button id="removeButton" on-tap="removeModule" icon="cancel"></paper-icon-button>
                 <paper-tooltip for="removeButton" position="right">Remove entry</paper-tooltip>
-                <paper-input style="" no-label-float value="{{name}}" label="Student name" class="flex name"></paper-input>
+                <paper-input no-label-float value="{{name}}" label="Student name" class="flex name"></paper-input>
             </div>
         </paper-card>
     </template>
     <script>
         Polymer({
             is: 'edit-module',
-            removeModule: function() {
+            properties: {
+                name: String
+            },
+            removeModule: function () {
                 this.remove();
             },
             getIndex: function () {
                 let parent = this.parentNode;
                 return Array.prototype.indexOf.call(parent.children, this);
             },
-            swapUp: function() {
+            swapUp: function () {
                 this.fire("swapNodes", {
                     child1: this,
                     child2: this.previousSibling
                 });
             },
-            swapDown: function() {
+            swapDown: function () {
                 this.fire("swapNodes", {
                     child1: this,
                     child2: this.nextSibling
@@ -97,47 +104,56 @@
     <script>
         Polymer({
             is: 'edit-list-view',
-            ready: function() {
-                this.addEventListener("removeChild", function(e) {
-                    document.getElementById("sortable-list").removeChild( e.detail.childEl );
+            properties: {
+                classNamesArray: {
+                    type: Array,
+                    value: []
+                }
+            },
+            ready: function () {
+                this.addEventListener("removeChild", function (e) {
+                    this.shadowRoot.querySelector("#sortable-list").removeChild(e.detail.childEl);
                 });
-                this.addEventListener("swapNodes", function(e) {
-                    if ( e.detail.child1 != null && e.detail.child2 != null ) {
+                this.addEventListener("swapNodes", function (e) {
+                    if (e.detail.child1 != null && e.detail.child2 != null) {
                         let temp = e.detail.child1.name;
                         e.detail.child1.name = e.detail.child2.name;
                         e.detail.child2.name = temp;
                     }
                 });
-
-
             },
-            attached: function() {
-                const fs = require('fs');
-                let classArray = [];
-                try {
-                    classArray = JSON.parse(fs.readFileSync('class.json', 'utf8'));
-                    let sortableList = document.getElementById("sortable-list")
-                    for ( let i = 0; i < classArray.length; i++) {
+            attached: function () {
+                setTimeout(function () {
+                    const fs = require('fs');
+                    try {
+                        this.classNamesArray = JSON.parse(fs.readFileSync('class.json', 'utf8'));
+                    }
+                    catch (err) { console.log(err) }
+                    let sortableList = this.shadowRoot.querySelector("#sortable-list");
+                    for (let i = 0; i < this.classNamesArray.length; i++) {
                         let dynamicEl = document.createElement("edit-module");
-                        dynamicEl.setAttribute("name", classArray[i]);
+                        dynamicEl.setAttribute("name", this.classNamesArray[i]);
                         sortableList.appendChild(dynamicEl);
                     }
-                }
-                catch (err){}
+                }.bind(this), 0);
             },
-            addModule: function() {
+            addModule: function () {
                 let dynamicEl = document.createElement("edit-module");
                 dynamicEl.setAttribute("name", "");
-                document.getElementById("sortable-list").appendChild(dynamicEl);
+                this.shadowRoot.querySelector("#sortable-list").appendChild(dynamicEl);
             },
-            saveList: function() {
+            saveList: function () {
                 let classList = [];
-                let listChildren = document.getElementById("sortable-list").children;
-                for ( let i = 0; i < listChildren.length; i++ ) {
+                let listChildren = this.shadowRoot.querySelector("#sortable-list").children;
+                for (let i = 0; i < listChildren.length; i++) {
                     classList.push(listChildren[i].name);
                 }
                 const fs = require('fs');
-                fs.writeFileSync('class.json', JSON.stringify(classList),'utf8');
+                try {
+                    fs.writeFileSync('class.json', JSON.stringify(classList), 'utf8');
+                }
+                catch (err) { console.error(err) }
+                this.fire("refreshClassList");
             }
         });
     </script>

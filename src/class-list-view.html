@@ -4,18 +4,26 @@
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
 
 
 <dom-module id="student-module" attributes="name index">
     <template>
         <style is="custom-style" include="iron-flex iron-flex-alignment">
-            :host {
+             :host {
                 display: flex;
                 padding: 2px;
             }
 
             h3 {
                 margin: 0;
+            }
+
+            .name {
+                min-width: 0;
+                white-space: normal;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             paper-radio-button {
@@ -28,7 +36,7 @@
         <paper-card style="width:100%">
             <div class="card-content horizontal layout center">
                 <h3 class="name flex">{{name}}</h3>
-                <paper-radio-group id="radio-group-[[index]]" class="radio-group" selected="{{selected}}">
+                <paper-radio-group id="radio-group-[[index]]" class="flex-none radio-group" selected="{{selected}}">
                     <paper-radio-button name="hot">H</paper-radio-button>
                     <paper-radio-button name="cold">C</paper-radio-button>
                     <paper-radio-button name="bag">B</paper-radio-button>
@@ -41,9 +49,8 @@
         Polymer({
             is: 'student-module',
             attached: function () {
-                if ( this.index % 2 == 1 ){
-                    this.customStyle['--paper-card-background-color'] = '#D7CCC8';
-                    this.updateStyles();
+                if (this.index % 2 == 1) {
+                    this.updateStyles({ '--paper-card-background-color': '#D7CCC8' });
                 }
             },
             properties: {
@@ -51,7 +58,9 @@
                     type: String,
                     observer: "selectionChanged",
                     value: "absent"
-                }
+                },
+                name: String,
+                index: Number
             },
             selectionChanged: function (newVal, oldVal) {
                 if (oldVal != undefined) {
@@ -69,46 +78,194 @@
 <dom-module id="class-list-header">
     <template>
         <style is="custom-style" include="iron-flex iron-flex-alignment">
-            h4 {
-                margin: 0;
+            .column-label {
                 width: 46px;
             }
+
             paper-icon-button {
                 height: 30px;
                 width: 30px;
                 padding: 2px;
+                color: #212121;
             }
+
             paper-icon-button:hover {
                 color: #932313;
             }
+
+            h3 {
+                margin: 0;
+                color: #212121;
+            }
+
+            h4 {
+                margin: 0;
+                color: #424242;
+            }
+
+            .absent-names {
+                min-width: 0;
+                white-space: normal;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .sticky-header {
+                position: fixed;
+                top: 30px;
+            }
+
+            .card-content {
+                padding: 8px;
+            }
+
+            .header-card {
+                width: 100%;
+            }
         </style>
-        <paper-card style="width:100%" id="header-card">
+        <paper-card class="header-card">
+            <div class="card-content">
+                <div id="counts" class="layout horizontal">
+                    <h3 style="padding-right: 1em">Hot: [[hotCount]]</h3>
+                    <h3 style="padding-right: 1em">Cold: [[coldCount]]</h3>
+                    <h3 style="padding-right: 1em">Bag: [[bagCount]]</h3>
+                    <h3>Absent: [[absentNamesArray.length]]</h3>
+                </div>
+                <h4 class="absent-names">[[absentNamesString]]</h4>
+            </div>
             <div class="card-content horizontal layout center">
                 <div class="flex">
                     <paper-icon-button id="refreshIcon" icon="refresh" on-tap="refreshList"></paper-icon-button>
                     <paper-tooltip for="refreshIcon" position="right">Reload the page to update student list.</paper-tooltip>
                 </div>
-                <h4>Hot</h4>
-                <h4>Cold</h4>
-                <h4>Bag</h4>
-                <h4>Absent</h4>
+                <h4 class="column-label">Hot</h4>
+                <h4 class="column-label">Cold</h4>
+                <h4 class="column-label">Bag</h4>
+                <h4 class="column-label">Absent</h4>
             </div>
         </paper-card>
     </template>
     <script>
         Polymer({
             is: 'class-list-header',
-            refreshList: function() {
-                location.reload();
+            refreshList: function () {
+                this.fire("refreshClassList");
+            },
+            properties: {
+                hotCount: {
+                    type: Number,
+                    value: 0
+                },
+                coldCount: {
+                    type: Number,
+                    value: 0
+                },
+                bagCount: {
+                    type: Number,
+                    value: 0
+                },
+                absentNamesString: {
+                    type: String,
+                    value: ""
+                },
+                absentNamesArray: {
+                    type: Array,
+                    value: []
+                }
             }
         });
     </script>
 </dom-module>
 
 <dom-module id="class-list-view">
-    <script src="class-list-view.js">
+    <template>
+    </template>
+    <script>
         Polymer({
-            is: 'class-list-view'
+            is: 'class-list-view',
+            ready: function () {
+                setTimeout(function () {
+                    this.createList();
+                }.bind(this), 0);
+
+            },
+            properties: {
+                classNamesArray: Object,
+                classData: {
+                    type: Array,
+                    value: []
+                }
+            },
+            createList: function () {
+                const fs = require('fs');
+                try {
+                    this.classNamesArray = JSON.parse(fs.readFileSync('class.json', 'utf8'));
+                }
+                catch (err) { console.log(err) }
+                for (let index = 0; index < this.classNamesArray.length; index++) {
+                    let dynamicEl = document.createElement("student-module");
+                    dynamicEl.setAttribute("index", index);
+                    dynamicEl.setAttribute("name", this.classNamesArray[index]);
+                    dynamicEl.setAttribute("class", "student-module");
+                    Polymer.dom(this.root).appendChild(dynamicEl);
+                    dynamicEl.addEventListener("radioChange", e => this.radioChanged(e));
+                    this.classData[index] = {
+                        "name": this.classNamesArray[index],
+                        "value": "absent"
+                    };
+                }
+                this.updateTotals();
+            },
+            radioChanged: function (e) {
+                this.classData[e.detail.index] = {
+                    "name": e.detail.name,
+                    "value": e.detail.radio
+                };
+                this.updateTotals();
+            },
+            updateTotals: function () {
+                let hotCount = 0, coldCount = 0, bagCount = 0, absentNamesArray = [];
+                for (let index = 0; index < this.classData.length; index++) {
+                    switch (this.classData[index].value) {
+                        case "hot":
+                            hotCount++;
+                            break;
+                        case "cold":
+                            coldCount++;
+                            break;
+                        case "bag":
+                            bagCount++;
+                            break;
+                        case "absent":
+                            absentNamesArray.push(this.classData[index].name);
+                    }
+                }
+                counts = {
+                    "hotCount": hotCount,
+                    "coldCount": coldCount,
+                    "bagCount": bagCount,
+                    "absentNamesArray": absentNamesArray,
+                    "absentNamesString": this.spaceCommaArray(absentNamesArray)
+                }
+                this.fire("updateCounts", counts)
+            },
+            spaceCommaArray: function (commaListArray) {
+                let commaListString = "";
+                for (let index = 0; index < commaListArray.length; index++) {
+                    if (index == 0)
+                        commaListString = commaListArray[0];
+                    else
+                        commaListString += ", " + commaListArray[index];
+                }
+                return commaListString
+            },
+            refreshList: function () {
+                let childNodes = this.shadowRoot.querySelectorAll(".student-module");
+                for (let index = 0; index < childNodes.length; index++) {
+                    this.shadowRoot.removeChild(childNodes[index]);
+                }
+                this.createList();
+            }
         });
     </script>
 </dom-module>

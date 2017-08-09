@@ -1,6 +1,6 @@
 {
   "name": "class-attendance",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Easily collect attendance numbers and lunch count via touch input.",
   "main": "main.js",
   "scripts": {

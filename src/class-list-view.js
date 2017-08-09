@@ -12,7 +12,12 @@
 
         function createList() {
             let headerEl = document.createElement("class-list-header");
-            document.getElementById("class-list-view").appendChild(headerEl);
+            let parentEl = document.getElementById("class-list-view");
+            //Polymer.dom(this.$.classListView).appendChild(headerEl);
+            //Polymer.dom(document.getElementById("class-list-view")).appendChild(headerEl);
+            //parentEl.attachShadow({mode: 'open'});
+            //parentEl.shadowRoot.appendChild(headerEl);
+            parentEl.appendChild(headerEl);
             for (let index = 0; index < classArray.length; index++) {
                 let dynamicEl = document.createElement("student-module");
                 dynamicEl.setAttribute("index", index);
@@ -20,6 +25,7 @@
                 dynamicEl.setAttribute("id", "student-module-" + index);
                 document.getElementById("class-list-view").appendChild(dynamicEl);
                 document.getElementById("student-module-" + index).addEventListener("radioChange", radioChanged);
+                classData[index] = "test";
                 classData[index] = {
                     "name": classArray[index],
                     "value": "absent"
