@@ -5,6 +5,12 @@
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+
 
 
 <dom-module id="student-module" attributes="name index">
@@ -78,6 +84,14 @@
 <dom-module id="class-list-header">
     <template>
         <style is="custom-style" include="iron-flex iron-flex-alignment">
+             :host {
+                display: inline-block;
+                width: 100%;
+                position: sticky;
+                top: 0;
+                z-index: 1;
+            }
+
             .column-label {
                 width: 46px;
             }
@@ -131,7 +145,7 @@
                     <h3 style="padding-right: 1em">Bag: [[bagCount]]</h3>
                     <h3>Absent: [[absentNamesArray.length]]</h3>
                 </div>
-                <h4 class="absent-names">[[absentNamesString]]</h4>
+                <h4 class="absent-names">Absent: [[absentNamesString]]</h4>
             </div>
             <div class="card-content horizontal layout center">
                 <div class="flex">
@@ -141,7 +155,7 @@
                 <h4 class="column-label">Hot</h4>
                 <h4 class="column-label">Cold</h4>
                 <h4 class="column-label">Bag</h4>
-                <h4 class="column-label">Absent</h4>
+                <h4 class="column-label" style="padding-right: 15px;">Absent</h4>
             </div>
         </paper-card>
     </template>
@@ -179,6 +193,7 @@
 
 <dom-module id="class-list-view">
     <template>
+        <class-list-header id="class-list-header"></class-list-header>
     </template>
     <script>
         Polymer({
@@ -187,7 +202,7 @@
                 setTimeout(function () {
                     this.createList();
                 }.bind(this), 0);
-
+                this.addEventListener('updateCounts', (e) => this.updateCounts(e));
             },
             properties: {
                 classNamesArray: Object,
@@ -198,23 +213,25 @@
             },
             createList: function () {
                 const fs = require('fs');
+                const electron = require('electron');
+                const app = electron.app;
                 try {
-                    this.classNamesArray = JSON.parse(fs.readFileSync('class.json', 'utf8'));
+                    this.classNamesArray = JSON.parse(fs.readFileSync('./class.json', 'utf8'));
+                    for (let index = 0; index < this.classNamesArray.length; index++) {
+                        let dynamicEl = document.createElement("student-module");
+                        dynamicEl.setAttribute("index", index);
+                        dynamicEl.setAttribute("name", this.classNamesArray[index]);
+                        dynamicEl.setAttribute("class", "student-module");
+                        Polymer.dom(this.root).appendChild(dynamicEl);
+                        dynamicEl.addEventListener("radioChange", e => this.radioChanged(e));
+                        this.classData[index] = {
+                            "name": this.classNamesArray[index],
+                            "value": "absent"
+                        };
+                    }
+                    this.updateTotals();
                 }
                 catch (err) { console.log(err) }
-                for (let index = 0; index < this.classNamesArray.length; index++) {
-                    let dynamicEl = document.createElement("student-module");
-                    dynamicEl.setAttribute("index", index);
-                    dynamicEl.setAttribute("name", this.classNamesArray[index]);
-                    dynamicEl.setAttribute("class", "student-module");
-                    Polymer.dom(this.root).appendChild(dynamicEl);
-                    dynamicEl.addEventListener("radioChange", e => this.radioChanged(e));
-                    this.classData[index] = {
-                        "name": this.classNamesArray[index],
-                        "value": "absent"
-                    };
-                }
-                this.updateTotals();
             },
             radioChanged: function (e) {
                 this.classData[e.detail.index] = {
@@ -265,6 +282,14 @@
                     this.shadowRoot.removeChild(childNodes[index]);
                 }
                 this.createList();
+            },
+            updateCounts: function (e) {
+                let headerEl = this.shadowRoot.querySelector("#class-list-header");
+                headerEl.hotCount = e.detail.hotCount;
+                headerEl.coldCount = e.detail.coldCount;
+                headerEl.bagCount = e.detail.bagCount;
+                headerEl.absentNamesString = e.detail.absentNamesString;
+                headerEl.absentNamesArray = e.detail.absentNamesArray;
             }
         });
     </script>

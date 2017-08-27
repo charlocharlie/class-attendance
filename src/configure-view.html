@@ -1,0 +1,27 @@
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="edit-list-view.html">
+<link rel="import" href="edit-lunch-view.html">
+<dom-module id="configure-view">
+    <template>
+        <paper-tabs selected="{{selected}}">
+            <paper-tab>Class List</paper-tab>
+            <!-- <paper-tab>Lunch Types</paper-tab> -->
+        </paper-tabs>
+        <iron-pages selected="[[selected]]">
+            <edit-list-view></edit-list-view>
+            <!-- <edit-lunch-view></edit-lunch-view> -->
+        </iron-pages>
+
+    </template>
+    <script>
+        Polymer({
+            is: 'configure-view',
+            properties: {
+                selected: {
+                    value: 0
+                }
+            }
+        });
+    </script>
+</dom-module>

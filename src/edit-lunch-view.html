@@ -4,11 +4,8 @@
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
-<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
-<link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 
-<dom-module id="edit-student-module" attributes="name">
+<dom-module id="lunch-module" attributes="type initial">
     <template>
         <style is="custom-style" include="iron-flex iron-flex-alignment">
              :host {
@@ -53,15 +50,17 @@
                 </div>
                 <paper-icon-button id="removeButton" on-tap="removeModule" icon="cancel"></paper-icon-button>
                 <paper-tooltip for="removeButton" position="right">Remove entry</paper-tooltip>
-                <paper-input no-label-float value="{{name}}" label="Student name" class="flex name"></paper-input>
+                <paper-input no-label-float value="{{type}}" label="Lunch name" class="flex name"></paper-input>
+                <paper-input no-label-float value="{{initial}}" label="Lunch initial" class="flex name"></paper-input>
             </div>
         </paper-card>
     </template>
     <script>
         Polymer({
-            is: 'edit-student-module',
+            is: 'lunch-module',
             properties: {
-                name: String
+                type: String,
+                initial: String
             },
             removeModule: function () {
                 this.remove();
@@ -86,33 +85,19 @@
     </script>
 </dom-module>
 
-<dom-module id="edit-list-view">
+<dom-module id="edit-lunch-view">
     <template>
         <style is="custom-style" include="iron-flex iron-flex-alignment">
             paper-icon-button:hover {
                 color: #932313;
             }
-
-            paper-icon-button {
-                color: var(--paper-grey-700);
-            }
         </style>
         <div class="layout vertical">
-            <!-- <paper-card>
-                <div class="layout horizontal end card-content">
-                    <paper-dropdown-menu class="class-select" label="Section">
-                        <paper-listbox slot="dropdown-content" selected="1">
-                            <paper-item>1st Hour</paper-item>
-                            <paper-item>2nd Hour</paper-item>
-                            <paper-item>3rd Hour</paper-item>
-                            <paper-item>4th Hour</paper-item>
-                        </paper-listbox>
-                    </paper-dropdown-menu>
-                    <paper-icon-button id="addSectionButton" icon="add-circle-outline" on-tap="addSection"></paper-icon-button>
-                    <paper-icon-button id="removeSectionButton" icon="remove-circle-outline" on-tap="removeSection"></paper-icon-button>
-                </div>
-            </paper-card> -->
-            <div id="sortable-list"></div>
+            <div id="sortable-list">
+                <lunch-module type="Hot" initial="H"></lunch-module>
+                <lunch-module type="Cold" initial="C"></lunch-module>
+                <lunch-module type="Bag" initial="B"></lunch-module>
+            </div>
             <div class="layout horizontal">
                 <paper-icon-button id="addButton" icon="add-circle-outline" on-tap="addModule"></paper-icon-button>
                 <paper-tooltip for="addButton" position="right">Add new entry</paper-tooltip>
@@ -120,13 +105,12 @@
                 <paper-tooltip for="saveButton" position="right">Save list permanently</paper-tooltip>
             </div>
         </div>
-
-    </template>
+    </template>1
     <script>
         Polymer({
-            is: 'edit-list-view',
+            is: 'edit-lunch-view',
             properties: {
-                classNamesArray: {
+                lunchTypesArray: {
                     type: Array,
                     value: []
                 }
@@ -145,22 +129,23 @@
             },
             attached: function () {
                 setTimeout(function () {
-                    const fs = require('fs');
-                    try {
-                        this.classNamesArray = JSON.parse(fs.readFileSync('./class.json', 'utf8'));
-                        let sortableList = this.shadowRoot.querySelector("#sortable-list");
-                        for (let i = 0; i < this.classNamesArray.length; i++) {
-                            let dynamicEl = document.createElement("edit-student-module");
-                            dynamicEl.setAttribute("name", this.classNamesArray[i]);
-                            sortableList.appendChild(dynamicEl);
-                        }
-                    }
-                    catch (err) { console.log(err) }
+                    // const fs = require('fs');
+                    // try {
+                    //     this.classNamesArray = JSON.parse(fs.readFileSync('class.json', 'utf8'));
+                    // }
+                    // catch (err) { console.log(err) }
+                    // let sortableList = this.shadowRoot.querySelector("#sortable-list");
+                    // for (let i = 0; i < 10; i++) {
+                    //     let dynamicEl = document.createElement("edit-student-module");
+                    //     dynamicEl.setAttribute("name", "Student Name " + i);
+                    //     sortableList.appendChild(dynamicEl);
+                    // }
                 }.bind(this), 0);
             },
             addModule: function () {
-                let dynamicEl = document.createElement("edit-student-module");
-                dynamicEl.setAttribute("name", "");
+                let dynamicEl = document.createElement("lunch-module");
+                dynamicEl.setAttribute("type", "");
+                dynamicEl.setAttribute("initial", "");
                 this.shadowRoot.querySelector("#sortable-list").appendChild(dynamicEl);
             },
             saveList: function () {
@@ -169,11 +154,11 @@
                 for (let i = 0; i < listChildren.length; i++) {
                     classList.push(listChildren[i].name);
                 }
-                const fs = require('fs');
-                try {
-                    fs.writeFileSync('./class.json', JSON.stringify(classList), 'utf8');
-                }
-                catch (err) { console.error(err) }
+                // const fs = require('fs');
+                // try {
+                //     fs.writeFileSync('class.json', JSON.stringify(classList), 'utf8');
+                // }
+                // catch (err) { console.error(err) }
                 this.fire("refreshClassList");
             }
         });
